@@ -14,10 +14,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
-	mockdb "github.com/techschool/simplebank/db/mock"
-	db "github.com/techschool/simplebank/db/sqlc"
-	"github.com/techschool/simplebank/token"
-	"github.com/techschool/simplebank/util"
+	mockdb "github.com/mstoews/prd-backup-server/db/mock"
+	db "github.com/mstoews/prd-backup-server/db/sqlc"
+	"github.com/mstoews/prd-backup-server/token"
+	"github.com/mstoews/prd-backup-server/util"
 )
 
 func TestGetAccountAPI(t *testing.T) {

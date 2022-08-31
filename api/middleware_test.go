@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
-	"github.com/techschool/simplebank/token"
+	"github.com/mstoews/prd-backup-server/token"
 )
 
 func addAuthorization(

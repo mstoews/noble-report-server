@@ -1,4 +1,4 @@
-module github.com/techschool/simplebank
+module github.com/mstoews/prd-backup-server
 
 go 1.18
 
