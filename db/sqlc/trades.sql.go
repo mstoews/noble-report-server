@@ -55,7 +55,7 @@ func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade
 	return i, err
 }
 
-const getTrade = `-- name: GetTrade :many
+const getTrade = `-- name: GetTrade :one
 
 SELECT trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date FROM trade
 WHERE 
@@ -65,8 +65,30 @@ LIMIT 1
 `
 
 // INSERT INTO trade (trd_recordno,trd_glosstraderef,trd_versiono,trd_origin,trd_tradetype,trd_settlementstatus,trd_tradestatus,trd_originversion) VALUES (148931,00000000000000138893,1,'TE','ECAG','CANC','C',2, '2022-02-01);
-func (q *Queries) GetTrade(ctx context.Context, trdRecordno int32) ([]Trade, error) {
-	rows, err := q.db.QueryContext(ctx, getTrade, trdRecordno)
+func (q *Queries) GetTrade(ctx context.Context, trdRecordno int32) (Trade, error) {
+	row := q.db.QueryRowContext(ctx, getTrade, trdRecordno)
+	var i Trade
+	err := row.Scan(
+		&i.TrdRecordno,
+		&i.TrdGlosstraderef,
+		&i.TrdVersiono,
+		&i.TrdOrigin,
+		&i.TrdTradetype,
+		&i.TrdSettlementstatus,
+		&i.TrdTradestatus,
+		&i.TrdOriginversion,
+		&i.TrdDate,
+	)
+	return i, err
+}
+
+const listAllTrades = `-- name: ListAllTrades :many
+SELECT trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date FROM trade 
+LIMIT 100
+`
+
+func (q *Queries) ListAllTrades(ctx context.Context) ([]Trade, error) {
+	rows, err := q.db.QueryContext(ctx, listAllTrades)
 	if err != nil {
 		return nil, err
 	}

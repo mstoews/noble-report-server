@@ -24,10 +24,11 @@ type Querier interface {
 	GetEntry(ctx context.Context, id int64) (Entry, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	// INSERT INTO trade (trd_recordno,trd_glosstraderef,trd_versiono,trd_origin,trd_tradetype,trd_settlementstatus,trd_tradestatus,trd_originversion) VALUES (148931,00000000000000138893,1,'TE','ECAG','CANC','C',2, '2022-02-01);
-	GetTrade(ctx context.Context, trdRecordno int32) ([]Trade, error)
+	GetTrade(ctx context.Context, trdRecordno int32) (Trade, error)
 	GetTransfer(ctx context.Context, id int64) (Transfer, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error)
+	ListAllTrades(ctx context.Context) ([]Trade, error)
 	ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error)
 	ListTrades(ctx context.Context, arg ListTradesParams) ([]Trade, error)
 	ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfer, error)

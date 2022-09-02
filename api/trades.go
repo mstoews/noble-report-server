@@ -3,11 +3,12 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	// "github.com/lib/pq"
 	db "github.com/mstoews/prd-backup-server/db/sqlc"
-	"github.com/mstoews/prd-backup-server/token"
+	// "github.com/mstoews/prd-backup-server/token"
 )
 
 // type createAccountRequest struct {
@@ -89,7 +90,7 @@ func (server *Server) getTrade(ctx *gin.Context) {
 }
 
 type listTradeRequest struct {
-	TrdDate  time.Time `json:"trd_date"`
+	TrdDate  time.Time `form:"trd_date" binding:"required,min=1"`
 	PageID   int32 `form:"page_id" binding:"required,min=1"`
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
@@ -102,12 +103,12 @@ func (server *Server) listTrades(ctx *gin.Context) {
 	}
 	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	    arg := db.ListTradesParams{
-		Owner:  authPayload.Username,
+		TrdDate:  req.TrdDate,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	tradess, err := server.store.ListTrades(ctx, arg)
+	trades, err := server.store.ListTrades(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
