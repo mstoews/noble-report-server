@@ -52,14 +52,15 @@ type Session struct {
 }
 
 type Trade struct {
-	TrdRecordno         int32  `json:"trd_recordno"`
-	TrdGlosstraderef    int32  `json:"trd_glosstraderef"`
-	TrdVersiono         int32  `json:"trd_versiono"`
-	TrdOrigin           string `json:"trd_origin"`
-	TrdTradetype        string `json:"trd_tradetype"`
-	TrdSettlementstatus string `json:"trd_settlementstatus"`
-	TrdTradestatus      string `json:"trd_tradestatus"`
-	TrdOriginversion    int32  `json:"trd_originversion"`
+	TrdRecordno         int32     `json:"trd_recordno"`
+	TrdGlosstraderef    int32     `json:"trd_glosstraderef"`
+	TrdVersiono         int32     `json:"trd_versiono"`
+	TrdOrigin           string    `json:"trd_origin"`
+	TrdTradetype        string    `json:"trd_tradetype"`
+	TrdSettlementstatus string    `json:"trd_settlementstatus"`
+	TrdTradestatus      string    `json:"trd_tradestatus"`
+	TrdOriginversion    int32     `json:"trd_originversion"`
+	TrdDate             time.Time `json:"trd_date"`
 }
 
 type Transfer struct {

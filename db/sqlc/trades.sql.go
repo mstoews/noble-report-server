@@ -7,21 +7,25 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createTrade = `-- name: CreateTrade :one
-INSERT INTO trade (trd_recordno,trd_glosstraderef,trd_versiono,trd_origin,trd_tradetype,trd_settlementstatus,trd_tradestatus,trd_originversion) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion
+INSERT INTO trade (trd_recordno,trd_glosstraderef,trd_versiono,trd_origin,
+trd_tradetype,trd_settlementstatus,trd_tradestatus,trd_originversion,trd_date) 
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date
 `
 
 type CreateTradeParams struct {
-	TrdRecordno         int32  `json:"trd_recordno"`
-	TrdGlosstraderef    int32  `json:"trd_glosstraderef"`
-	TrdVersiono         int32  `json:"trd_versiono"`
-	TrdOrigin           string `json:"trd_origin"`
-	TrdTradetype        string `json:"trd_tradetype"`
-	TrdSettlementstatus string `json:"trd_settlementstatus"`
-	TrdTradestatus      string `json:"trd_tradestatus"`
-	TrdOriginversion    int32  `json:"trd_originversion"`
+	TrdRecordno         int32     `json:"trd_recordno"`
+	TrdGlosstraderef    int32     `json:"trd_glosstraderef"`
+	TrdVersiono         int32     `json:"trd_versiono"`
+	TrdOrigin           string    `json:"trd_origin"`
+	TrdTradetype        string    `json:"trd_tradetype"`
+	TrdSettlementstatus string    `json:"trd_settlementstatus"`
+	TrdTradestatus      string    `json:"trd_tradestatus"`
+	TrdOriginversion    int32     `json:"trd_originversion"`
+	TrdDate             time.Time `json:"trd_date"`
 }
 
 func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade, error) {
@@ -34,6 +38,7 @@ func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade
 		arg.TrdSettlementstatus,
 		arg.TrdTradestatus,
 		arg.TrdOriginversion,
+		arg.TrdDate,
 	)
 	var i Trade
 	err := row.Scan(
@@ -45,6 +50,98 @@ func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade
 		&i.TrdSettlementstatus,
 		&i.TrdTradestatus,
 		&i.TrdOriginversion,
+		&i.TrdDate,
 	)
 	return i, err
+}
+
+const getTrade = `-- name: GetTrade :many
+
+SELECT trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date FROM trade
+WHERE 
+    trd_recordno = $1
+ORDER BY trd_recordno
+LIMIT 1
+`
+
+// INSERT INTO trade (trd_recordno,trd_glosstraderef,trd_versiono,trd_origin,trd_tradetype,trd_settlementstatus,trd_tradestatus,trd_originversion) VALUES (148931,00000000000000138893,1,'TE','ECAG','CANC','C',2, '2022-02-01);
+func (q *Queries) GetTrade(ctx context.Context, trdRecordno int32) ([]Trade, error) {
+	rows, err := q.db.QueryContext(ctx, getTrade, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Trade{}
+	for rows.Next() {
+		var i Trade
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdGlosstraderef,
+			&i.TrdVersiono,
+			&i.TrdOrigin,
+			&i.TrdTradetype,
+			&i.TrdSettlementstatus,
+			&i.TrdTradestatus,
+			&i.TrdOriginversion,
+			&i.TrdDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTrades = `-- name: ListTrades :many
+SELECT trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date FROM trade
+WHERE 
+    trd_date = $1 
+ORDER BY trd_recordno
+LIMIT $2
+OFFSET $3
+`
+
+type ListTradesParams struct {
+	TrdDate time.Time `json:"trd_date"`
+	Limit   int32     `json:"limit"`
+	Offset  int32     `json:"offset"`
+}
+
+func (q *Queries) ListTrades(ctx context.Context, arg ListTradesParams) ([]Trade, error) {
+	rows, err := q.db.QueryContext(ctx, listTrades, arg.TrdDate, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Trade{}
+	for rows.Next() {
+		var i Trade
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdGlosstraderef,
+			&i.TrdVersiono,
+			&i.TrdOrigin,
+			&i.TrdTradetype,
+			&i.TrdSettlementstatus,
+			&i.TrdTradestatus,
+			&i.TrdOriginversion,
+			&i.TrdDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

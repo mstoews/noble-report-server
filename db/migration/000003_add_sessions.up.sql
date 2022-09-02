@@ -21,15 +21,16 @@ CREATE TABLE trade (
     ,trd_settlementstatus  VARCHAR(4) NOT NULL
     ,trd_tradestatus       VARCHAR(1) NOT NULL
     ,trd_originversion     INTEGER  NOT NULL
-);
+    ,trd_date              DATE NOT NULL
 
+);
 
 CREATE TABLE IF NOT EXISTS external_ref (
    trd_recordno        INTEGER  NOT NULL PRIMARY KEY     
   ,ext_ref_extreftype  VARCHAR(4) NOT NULL
   ,ext_ref_extref      VARCHAR(3) NOT NULL
 );
-INSERT INTO trade.sql(trd_recordno, ext_ref_extreftype,ext_ref_refextref) VALUES (148931,'AVER','JPY');
+
 
 CREATE TABLE ref_date (
    trd_recordno     INTEGER  NOT NULL PRIMARY KEY 
@@ -39,6 +40,6 @@ CREATE TABLE ref_date (
   ,dateversionuser  VARCHAR(3) NOT NULL
 );
 
-INSERT INTO mytable(trd_recordno, datetype, datewil, refdatetime, dateversionuser) VALUES (148931,'ASDC','2021-07-29','07:00:00','SYS');
+
 
 

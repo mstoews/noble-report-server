@@ -1,1 +1,6 @@
 DROP TABLE IF EXISTS "sessions";
+DROP TABLE IF EXISTS "trade";
+DROP TABLE IF EXISTS "external_ref";
+DROP TABLE IF EXISTS "ref_date";
+
+
