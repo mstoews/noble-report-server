@@ -55,9 +55,16 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/accounts/:id", server.getAccount)
 	authRoutes.GET("/accounts", server.listAccounts)
 	
-	
+
 	// Trades 
 	authRoutes.GET("/trades", server.listAllTrades)
+
+	// Parties 
+	authRoutes.GET("/parties", server.listParties)
+
+	// Instruments 
+	authRoutes.GET("/instruments", server.ListInstruments)
+
 
 	server.router = router
 }

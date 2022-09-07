@@ -55,3 +55,5 @@ func (server *Server) listAllTrades(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, trades)
 }
+
+

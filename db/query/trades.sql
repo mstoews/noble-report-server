@@ -21,7 +21,8 @@ LIMIT 1;
 -- name: ListAllTrades :many
 SELECT *
 FROM trd_trade
-ORDER BY trd_recordno;
+ORDER BY trd_recordno
+LIMIT 20;
 
 -- name: ListTradeEvent :many
 SELECT *
@@ -194,14 +195,16 @@ RETURNING *;
 
 
 -- name: CreateTrdExternalRef :one
-insert into trd_external_ref (trd_recordno, 
+insert into trd_external_ref (trd_recordno,
                               ext_ref_extreftype, 
                               ext_ref_extref)
 values ($1,$2, $3)
 RETURNING *;
 
 -- name: CreateInstExt :one
-insert into trd_inst_ext (trd_recordno, trd_service, trd_extref)
+insert into trd_inst_ext (trd_recordno,
+                          trd_service, 
+                          trd_extref)
 values ($1,$2, $3)
 RETURNING *;
 
@@ -219,7 +222,7 @@ insert into trd_instruction (trd_recordno,
                              trd_servicestatus, 
                              trd_noofcopies, 
                              trd_duedatetime)
-values ($1,$2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12,$13, $14)
+values ($1,$2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 RETURNING *;
 
 
@@ -247,25 +250,6 @@ insert into trd_instrument (trd_recordno,
 values ($1,$2, $3, $4, $5, $6, $7)
 RETURNING *;
 
--- name: CreateJournal :one
-insert into trd_journal (trd_recordno, 
-                         trd_accounts_company, 
-                         trd_journal_type, 
-                         trd_posting_type, 
-                         trd_journal_no,
-                         trd_procaction)
-values ($1,$2, $3, $4, $5, $6);
-RETURNING *;
-
--- name: CreateLink :one
-insert into trd_link (trd_recordno, 
-                      trd_link_type_wil, 
-                      trd_main_record_no_wil, 
-                      trd_sub_recordno_wil, 
-                      trd_link_qty_wil,
-                      trd_link_status_wil)
-values ($1,$2, $3, $4, $5, $6);
-RETURNING *;
 
 -- name: CreateParty :one
 insert into trd_party (trd_recordno, 
@@ -274,7 +258,7 @@ insert into trd_party (trd_recordno,
                        trd_partyref_type_text, 
                        trd_ext_partyref,
                        trd_longname)
-values ($1,$2, $3, $4, $5, $6);
+values ($1,$2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: CreatePartyDriver :one
@@ -282,17 +266,17 @@ insert into trd_party_driver (trd_recordno,
                               trd_trade_party, 
                               trd_driver_type, 
                               trd_driver_code)
-values ($1,$2, $3, $4);
+values ($1,$2, $3, $4)
 RETURNING *;
 
 
 -- name: CreateProcessing :one
-insert into trd_processing (trd_recordno, 
+insert into trd_processing (trd_recordno,
                             trd_proc_alias, 
                             trd_proc_action, 
                             trd_due_datetime, 
                             trd_done_datetime)
-values ($1,$2, $3, $4, $5);
+values ($1,$2, $3, $4, $5)
 RETURNING *;
 
 -- name: CreateProcessingEvent :one
@@ -304,7 +288,7 @@ insert into trd_processing_event (trd_recordno,
                                   trd_eventcode, 
                                   trd_exceptiontype, 
                                   trd_expirydate)
-values ($1,$2, $3, $4, $5, $6, $7, $8);
+values ($1,$2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
 -- name: CreateRate :one
@@ -318,7 +302,7 @@ insert into trd_rate (trd_recordno,
                       trd_rate_entered, 
                       trd_charge_rate, 
                       trd_mult_divind)
-values ($1,$2, $3, $4, $5, $6, $7, $8, $9, $10);
+values ($1,$2, $3, $4, $5, $6, $7, $8, $9, $10)
 RETURNING *;
 
 
@@ -328,7 +312,7 @@ insert into trd_ref_date (trd_recordno,
                           datewil, 
                           refdatetime, 
                           dateversionuser)
-values ($1,$2, $3, $4, $5);
+values ($1,$2, $3, $4, $5)
 RETURNING *;
 
 -- name: CreateSettlement :one
@@ -357,18 +341,43 @@ insert into trd_settlement (trd_recordno,
                             trd_dompservicewil, 
                             trd_secpaliaswil, 
                             trd_secpservicewil)
-values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11, $12, $13, $14, $15, $16, $17, $18, $19, $20,$21, $22, $23, $24, $25, $26);
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11, $12, $13, $14, $15, $16, $17, $18, $19, $20,$21, $22, $23, $24, $25)
 RETURNING *;
 
 -- name: CreateTradeOne :one
-insert into trd_trade_code (trd_recordno, trd_ext, trd_radeclass, trd_radecode)
-values ($1, $2, $3);
+insert into trd_trade_code (trd_recordno, 
+                            trd_ext, 
+                            trd_radeclass, 
+                            trd_radecode)
+values ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: CreateTradeNarrative :one
-insert into trd_trade_narrative (trd_recordno, trd_narrative_code, trd_seqno, trd_narrative)
-values ($1, $2, $3, $4);
+insert into trd_trade_narrative (trd_recordno, 
+                                 trd_narrative_code, 
+                                 trd_seqno, 
+                                 trd_narrative)
+values ($1, $2, $3, $4)
 RETURNING *;
 
 
+-- name: CreateJournal :one
+insert into trd_journal (trd_recordno, 
+                         trd_accounts_company, 
+                         trd_journal_type, 
+                         trd_posting_type, 
+                         trd_journal_no,
+                         trd_procaction)
+values ($1,$2, $3, $4, $5, $6)
+RETURNING *;
+
+-- name: CreateLink :one
+insert into trd_link (trd_recordno, 
+                      trd_link_type_wil, 
+                      trd_main_record_no_wil, 
+                      trd_sub_recordno_wil, 
+                      trd_link_qty_wil,
+                      trd_link_status_wil)
+values ($1,$2, $3, $4, $5, $6)
+RETURNING *;
 

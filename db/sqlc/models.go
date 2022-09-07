@@ -26,6 +26,44 @@ type Entry struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type InstrInstrument struct {
+	InstrInstref    string `json:"instr_instref"`
+	InstrInstgrp    string `json:"instr_instgrp"`
+	InstrLongdesc   string `json:"instr_longdesc"`
+	InstrDenminst   string `json:"instr_denminst"`
+	InstrPricedps   string `json:"instr_pricedps"`
+	InstrDivisor    string `json:"instr_divisor"`
+	InstrMultiplier string `json:"instr_multiplier"`
+	InstrPricetype  string `json:"instr_pricetype"`
+	InstrTick       string `json:"instr_tick"`
+	InstrAccrued    string `json:"instr_accrued"`
+	InstrMinqty     string `json:"instr_minqty"`
+	InstrQtydps     string `json:"instr_qtydps"`
+	InstrShrtdesc   string `json:"instr_shrtdesc"`
+	InstrMarket     string `json:"instr_market"`
+	InstrSettinst   string `json:"instr_settinst"`
+	InstrBook       string `json:"instr_book"`
+	InstrMaxmovt    string `json:"instr_maxmovt"`
+	InstrMinmovt    string `json:"instr_minmovt"`
+	InstrActive     string `json:"instr_active"`
+	InstrVerdat     string `json:"instr_verdat"`
+}
+
+type PtyParty struct {
+	PtyPartyref  string `json:"pty_partyref"`
+	PtyCategory  string `json:"pty_category"`
+	PtyLongdesc  string `json:"pty_longdesc"`
+	PtyHoliday   string `json:"pty_holiday"`
+	PtyCountry   string `json:"pty_country"`
+	PtyLocation  string `json:"pty_location"`
+	PtyShrtdesc  string `json:"pty_shrtdesc"`
+	PtyPartynam1 string `json:"pty_partynam1"`
+	PtyPartynam2 string `json:"pty_partynam2"`
+	PtyPartynam3 string `json:"pty_partynam3"`
+	PtyActive    string `json:"pty_active"`
+	PtyVerdat    string `json:"pty_verdat"`
+}
+
 type Session struct {
 	ID           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`
