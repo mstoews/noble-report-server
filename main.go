@@ -35,12 +35,9 @@ func main() {
 		log.Fatal("cannot connect to db:", err)
 	}
 
-	// runDBMigration(config.MigrationURL, config.DBSource)
-
 	store := db.NewStore(conn)
+	runGinServer(config, store)
 
-	go runGatewayServer(config, store)
-	 runGrpcServer(config, store)
 }
 
 func runDBMigration(migrationURL string, dbSource string) {
@@ -137,3 +134,4 @@ func runGinServer(config util.Config, store db.Store) {
 		log.Fatal("cannot start server:", err)
 	}
 }
+

@@ -9,6 +9,7 @@ import (
 	db "github.com/mstoews/prd-backup-server/db/sqlc"
 	"github.com/mstoews/prd-backup-server/token"
 	"github.com/mstoews/prd-backup-server/util"
+	"github.com/gin-contrib/cors"
 )
 
 // Server serves HTTP requests for our banking service.
@@ -43,23 +44,43 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 
+	// Users
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 	router.POST("/tokens/renew_access", server.renewAccessToken)
-
-	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
-	authRoutes.POST("/accounts", server.createAccount)
+	
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))	
+	// Accounts
+	authRoutes.POST("/account", server.createAccount)
 	authRoutes.GET("/accounts/:id", server.getAccount)
 	authRoutes.GET("/accounts", server.listAccounts)
-	authRoutes.GET("/trades, server.listTrades")
-
-	authRoutes.POST("/transfers", server.createTransfer)
+	
+	
+	// Trades 
+	authRoutes.GET("/trades", server.listAllTrades)
 
 	server.router = router
 }
 
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
+	
+	// server.router.Use(cors.New(cors.Config{
+    //     AllowOrigins:     []string{"*"},
+    //     AllowMethods:     []string{"PUT", "PATCH, POST, GET"},
+    //     AllowHeaders:     []string{"Origin"},
+    //     ExposeHeaders:    []string{"Content-Length"},
+    //     AllowCredentials: true,
+    //     AllowOriginFunc: func(origin string) bool {
+    //         return origin == "http://localhost"
+    //     },
+    //     MaxAge: 12 * time.Hour,
+    // }))
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowHeaders = []string{"*"}
+	server.router.Use(cors.New(config))
 	return server.router.Run(address)
 }
 

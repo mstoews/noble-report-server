@@ -7,28 +7,35 @@ package db
 
 import (
 	"context"
-	"time"
 )
 
 const createTrade = `-- name: CreateTrade :one
-INSERT INTO trade (trd_recordno,trd_glosstraderef,trd_versiono,trd_origin,
-trd_tradetype,trd_settlementstatus,trd_tradestatus,trd_originversion,trd_date) 
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date
+INSERT INTO trd_trade (
+        trd_recordno,
+        trd_glosstraderef,
+        trd_versiono,
+        trd_origin,
+        trd_tradetype,
+        trd_settlementstatus,
+        trd_tradestatus,
+        trd_originversion
+    )
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING trd_uuid, trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion
 `
 
 type CreateTradeParams struct {
-	TrdRecordno         int32     `json:"trd_recordno"`
-	TrdGlosstraderef    int32     `json:"trd_glosstraderef"`
-	TrdVersiono         int32     `json:"trd_versiono"`
-	TrdOrigin           string    `json:"trd_origin"`
-	TrdTradetype        string    `json:"trd_tradetype"`
-	TrdSettlementstatus string    `json:"trd_settlementstatus"`
-	TrdTradestatus      string    `json:"trd_tradestatus"`
-	TrdOriginversion    int32     `json:"trd_originversion"`
-	TrdDate             time.Time `json:"trd_date"`
+	TrdRecordno         int32  `json:"trd_recordno"`
+	TrdGlosstraderef    int32  `json:"trd_glosstraderef"`
+	TrdVersiono         int32  `json:"trd_versiono"`
+	TrdOrigin           string `json:"trd_origin"`
+	TrdTradetype        string `json:"trd_tradetype"`
+	TrdSettlementstatus string `json:"trd_settlementstatus"`
+	TrdTradestatus      string `json:"trd_tradestatus"`
+	TrdOriginversion    int32  `json:"trd_originversion"`
 }
 
-func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade, error) {
+func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (TrdTrade, error) {
 	row := q.db.QueryRowContext(ctx, createTrade,
 		arg.TrdRecordno,
 		arg.TrdGlosstraderef,
@@ -38,10 +45,10 @@ func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade
 		arg.TrdSettlementstatus,
 		arg.TrdTradestatus,
 		arg.TrdOriginversion,
-		arg.TrdDate,
 	)
-	var i Trade
+	var i TrdTrade
 	err := row.Scan(
+		&i.TrdUuid,
 		&i.TrdRecordno,
 		&i.TrdGlosstraderef,
 		&i.TrdVersiono,
@@ -50,25 +57,23 @@ func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade
 		&i.TrdSettlementstatus,
 		&i.TrdTradestatus,
 		&i.TrdOriginversion,
-		&i.TrdDate,
 	)
 	return i, err
 }
 
 const getTrade = `-- name: GetTrade :one
-
-SELECT trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date FROM trade
-WHERE 
-    trd_recordno = $1
+SELECT trd_uuid, trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion
+FROM trd_trade
+WHERE trd_recordno = $1
 ORDER BY trd_recordno
 LIMIT 1
 `
 
-// INSERT INTO trade (trd_recordno,trd_glosstraderef,trd_versiono,trd_origin,trd_tradetype,trd_settlementstatus,trd_tradestatus,trd_originversion) VALUES (148931,00000000000000138893,1,'TE','ECAG','CANC','C',2, '2022-02-01);
-func (q *Queries) GetTrade(ctx context.Context, trdRecordno int32) (Trade, error) {
+func (q *Queries) GetTrade(ctx context.Context, trdRecordno int32) (TrdTrade, error) {
 	row := q.db.QueryRowContext(ctx, getTrade, trdRecordno)
-	var i Trade
+	var i TrdTrade
 	err := row.Scan(
+		&i.TrdUuid,
 		&i.TrdRecordno,
 		&i.TrdGlosstraderef,
 		&i.TrdVersiono,
@@ -77,26 +82,27 @@ func (q *Queries) GetTrade(ctx context.Context, trdRecordno int32) (Trade, error
 		&i.TrdSettlementstatus,
 		&i.TrdTradestatus,
 		&i.TrdOriginversion,
-		&i.TrdDate,
 	)
 	return i, err
 }
 
 const listAllTrades = `-- name: ListAllTrades :many
-SELECT trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date FROM trade 
-LIMIT 100
+SELECT trd_uuid, trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion
+FROM trd_trade
+ORDER BY trd_recordno
 `
 
-func (q *Queries) ListAllTrades(ctx context.Context) ([]Trade, error) {
+func (q *Queries) ListAllTrades(ctx context.Context) ([]TrdTrade, error) {
 	rows, err := q.db.QueryContext(ctx, listAllTrades)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Trade{}
+	items := []TrdTrade{}
 	for rows.Next() {
-		var i Trade
+		var i TrdTrade
 		if err := rows.Scan(
+			&i.TrdUuid,
 			&i.TrdRecordno,
 			&i.TrdGlosstraderef,
 			&i.TrdVersiono,
@@ -105,7 +111,751 @@ func (q *Queries) ListAllTrades(ctx context.Context) ([]Trade, error) {
 			&i.TrdSettlementstatus,
 			&i.TrdTradestatus,
 			&i.TrdOriginversion,
-			&i.TrdDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeAmount = `-- name: ListTradeAmount :many
+SELECT trd_recordno, trd_charge_levy_type_p2k, trd_charge_levy_instr_p2k, trd_charge_discount_wil, trd_charge_levy_qty_p2k, trd_charge_levyrate_p2k
+FROM trd_amount
+`
+
+func (q *Queries) ListTradeAmount(ctx context.Context) ([]TrdAmount, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeAmount)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdAmount{}
+	for rows.Next() {
+		var i TrdAmount
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdChargeLevyTypeP2k,
+			&i.TrdChargeLevyInstrP2k,
+			&i.TrdChargeDiscountWil,
+			&i.TrdChargeLevyQtyP2k,
+			&i.TrdChargeLevyrateP2k,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeCode = `-- name: ListTradeCode :many
+SELECT trd_recordno, trd_ext, trd_radeclass, trd_radecode
+FROM trd_trade_code
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeCode(ctx context.Context, trdRecordno int32) ([]TrdTradeCode, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeCode, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdTradeCode{}
+	for rows.Next() {
+		var i TrdTradeCode
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdExt,
+			&i.TrdRadeclass,
+			&i.TrdRadecode,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeDriver = `-- name: ListTradeDriver :many
+SELECT trd_recordno, trd_drivertype, trd_drivercode
+FROM trd_driver
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeDriver(ctx context.Context, trdRecordno int32) ([]TrdDriver, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeDriver, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdDriver{}
+	for rows.Next() {
+		var i TrdDriver
+		if err := rows.Scan(&i.TrdRecordno, &i.TrdDrivertype, &i.TrdDrivercode); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeEvent = `-- name: ListTradeEvent :many
+SELECT trd_recordno, trd_eventtype, trd_eventdate, trd_eventdateto, trd_entrydatetime, trd_eventcode, trd_exceptiontype, trd_expirydate
+FROM trd_event
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeEvent(ctx context.Context, trdRecordno int32) ([]TrdEvent, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeEvent, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdEvent{}
+	for rows.Next() {
+		var i TrdEvent
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdEventtype,
+			&i.TrdEventdate,
+			&i.TrdEventdateto,
+			&i.TrdEntrydatetime,
+			&i.TrdEventcode,
+			&i.TrdExceptiontype,
+			&i.TrdExpirydate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeEventNarrative = `-- name: ListTradeEventNarrative :many
+SELECT trd_recordno, trd_narrative_code, trd_seqno, trd_narrative
+FROM trd_event_narrative
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeEventNarrative(ctx context.Context, trdRecordno int32) ([]TrdEventNarrative, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeEventNarrative, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdEventNarrative{}
+	for rows.Next() {
+		var i TrdEventNarrative
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdNarrativeCode,
+			&i.TrdSeqno,
+			&i.TrdNarrative,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeExternalRef = `-- name: ListTradeExternalRef :many
+SELECT trd_recordno, ext_ref_extreftype, ext_ref_extref
+FROM trd_external_ref
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeExternalRef(ctx context.Context, trdRecordno int32) ([]TrdExternalRef, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeExternalRef, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdExternalRef{}
+	for rows.Next() {
+		var i TrdExternalRef
+		if err := rows.Scan(&i.TrdRecordno, &i.ExtRefExtreftype, &i.ExtRefExtref); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeInstExt = `-- name: ListTradeInstExt :many
+SELECT trd_recordno, trd_service, trd_extref
+FROM trd_inst_ext
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeInstExt(ctx context.Context, trdRecordno int32) ([]TrdInstExt, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeInstExt, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdInstExt{}
+	for rows.Next() {
+		var i TrdInstExt
+		if err := rows.Scan(&i.TrdRecordno, &i.TrdService, &i.TrdExtref); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeInstruction = `-- name: ListTradeInstruction :many
+SELECT trd_recordno, trd_procaction, trd_destination, trd_procstatus, trd_recordidentifier, trd_recordversion, trd_instformat, trd_tradeparty, trd_partyref, trd_deliverytype, trd_addresscode, trd_servicestatus, trd_noofcopies, trd_duedatetime
+FROM trd_instruction
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeInstruction(ctx context.Context, trdRecordno int32) ([]TrdInstruction, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeInstruction, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdInstruction{}
+	for rows.Next() {
+		var i TrdInstruction
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdProcaction,
+			&i.TrdDestination,
+			&i.TrdProcstatus,
+			&i.TrdRecordidentifier,
+			&i.TrdRecordversion,
+			&i.TrdInstformat,
+			&i.TrdTradeparty,
+			&i.TrdPartyref,
+			&i.TrdDeliverytype,
+			&i.TrdAddresscode,
+			&i.TrdServicestatus,
+			&i.TrdNoofcopies,
+			&i.TrdDuedatetime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeInstructionEffect = `-- name: ListTradeInstructionEffect :many
+SELECT trd_recordno, trd_eventtype, trd_eventdate, trd_eventdateto, trd_entrydatetime, trd_eventcode, trd_exceptiontype, trd_expirydate
+FROM trd_instruction_effect
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeInstructionEffect(ctx context.Context, trdRecordno int32) ([]TrdInstructionEffect, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeInstructionEffect, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdInstructionEffect{}
+	for rows.Next() {
+		var i TrdInstructionEffect
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdEventtype,
+			&i.TrdEventdate,
+			&i.TrdEventdateto,
+			&i.TrdEntrydatetime,
+			&i.TrdEventcode,
+			&i.TrdExceptiontype,
+			&i.TrdExpirydate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeInstrument = `-- name: ListTradeInstrument :many
+SELECT trd_recordno, trd_instrtype, trd_p2000instrref, trd_instrreftype, trd_instrref, trd_longname, trd_quantity
+FROM trd_instrument
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeInstrument(ctx context.Context, trdRecordno int32) ([]TrdInstrument, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeInstrument, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdInstrument{}
+	for rows.Next() {
+		var i TrdInstrument
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdInstrtype,
+			&i.TrdP2000instrref,
+			&i.TrdInstrreftype,
+			&i.TrdInstrref,
+			&i.TrdLongname,
+			&i.TrdQuantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeJournal = `-- name: ListTradeJournal :many
+SELECT trd_recordno, trd_accounts_company, trd_journal_type, trd_posting_type, trd_journal_no, trd_procaction
+FROM trd_journal
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeJournal(ctx context.Context, trdRecordno int32) ([]TrdJournal, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeJournal, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdJournal{}
+	for rows.Next() {
+		var i TrdJournal
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdAccountsCompany,
+			&i.TrdJournalType,
+			&i.TrdPostingType,
+			&i.TrdJournalNo,
+			&i.TrdProcaction,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeLink = `-- name: ListTradeLink :many
+SELECT trd_recordno, trd_link_type_wil, trd_main_record_no_wil, trd_sub_recordno_wil, trd_link_qty_wil, trd_link_status_wil
+FROM trd_link
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeLink(ctx context.Context, trdRecordno int32) ([]TrdLink, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeLink, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdLink{}
+	for rows.Next() {
+		var i TrdLink
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdLinkTypeWil,
+			&i.TrdMainRecordNoWil,
+			&i.TrdSubRecordnoWil,
+			&i.TrdLinkQtyWil,
+			&i.TrdLinkStatusWil,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeNarrative = `-- name: ListTradeNarrative :many
+SELECT trd_recordno, trd_narrative_code, trd_seqno, trd_narrative
+FROM trd_trade_narrative
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeNarrative(ctx context.Context, trdRecordno int32) ([]TrdTradeNarrative, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeNarrative, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdTradeNarrative{}
+	for rows.Next() {
+		var i TrdTradeNarrative
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdNarrativeCode,
+			&i.TrdSeqno,
+			&i.TrdNarrative,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeParty = `-- name: ListTradeParty :many
+SELECT trd_recordno, trd_trade_party, trd_partyref, trd_partyref_type_text, trd_ext_partyref, trd_longname
+FROM trd_party
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeParty(ctx context.Context, trdRecordno int32) ([]TrdParty, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeParty, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdParty{}
+	for rows.Next() {
+		var i TrdParty
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdTradeParty,
+			&i.TrdPartyref,
+			&i.TrdPartyrefTypeText,
+			&i.TrdExtPartyref,
+			&i.TrdLongname,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradePartyDriver = `-- name: ListTradePartyDriver :many
+SELECT trd_recordno, trd_trade_party, trd_driver_type, trd_driver_code
+FROM trd_party_driver
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradePartyDriver(ctx context.Context, trdRecordno int32) ([]TrdPartyDriver, error) {
+	rows, err := q.db.QueryContext(ctx, listTradePartyDriver, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdPartyDriver{}
+	for rows.Next() {
+		var i TrdPartyDriver
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdTradeParty,
+			&i.TrdDriverType,
+			&i.TrdDriverCode,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeProcessing = `-- name: ListTradeProcessing :many
+SELECT trd_recordno, trd_proc_alias, trd_proc_action, trd_due_datetime, trd_done_datetime
+FROM trd_processing
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeProcessing(ctx context.Context, trdRecordno int32) ([]TrdProcessing, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeProcessing, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdProcessing{}
+	for rows.Next() {
+		var i TrdProcessing
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdProcAlias,
+			&i.TrdProcAction,
+			&i.TrdDueDatetime,
+			&i.TrdDoneDatetime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeProcessingEvent = `-- name: ListTradeProcessingEvent :many
+SELECT trd_recordno, trd_eventtype, trd_eventdate, trd_eventdateto, trd_entrydatetime, trd_eventcode, trd_exceptiontype, trd_expirydate
+FROM trd_processing_event
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeProcessingEvent(ctx context.Context, trdRecordno int32) ([]TrdProcessingEvent, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeProcessingEvent, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdProcessingEvent{}
+	for rows.Next() {
+		var i TrdProcessingEvent
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdEventtype,
+			&i.TrdEventdate,
+			&i.TrdEventdateto,
+			&i.TrdEntrydatetime,
+			&i.TrdEventcode,
+			&i.TrdExceptiontype,
+			&i.TrdExpirydate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeRate = `-- name: ListTradeRate :many
+SELECT trd_recordno, trd_charge_levy_type, trd_actual_charge, trd_amount_type, trd_rate_instrref_type, trd_rate_instrref, trd_rate_instrid, trd_rate_entered, trd_charge_rate, trd_mult_divind
+FROM trd_rate
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeRate(ctx context.Context, trdRecordno int32) ([]TrdRate, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeRate, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdRate{}
+	for rows.Next() {
+		var i TrdRate
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdChargeLevyType,
+			&i.TrdActualCharge,
+			&i.TrdAmountType,
+			&i.TrdRateInstrrefType,
+			&i.TrdRateInstrref,
+			&i.TrdRateInstrid,
+			&i.TrdRateEntered,
+			&i.TrdChargeRate,
+			&i.TrdMultDivind,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeRefDate = `-- name: ListTradeRefDate :many
+SELECT trd_recordno, datetype, datewil, refdatetime, dateversionuser
+FROM trd_ref_date
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeRefDate(ctx context.Context, trdRecordno int32) ([]TrdRefDate, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeRefDate, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdRefDate{}
+	for rows.Next() {
+		var i TrdRefDate
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.Datetype,
+			&i.Datewil,
+			&i.Refdatetime,
+			&i.Dateversionuser,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTradeSettlement = `-- name: ListTradeSettlement :many
+SELECT trd_recordno, trd_deliverytype, trd_settleeventinstr, trd_settleterms, trd_originalqty, trd_openqty, trd_settledate, trd_delrecind, trd_settlestatus, trd_tradestatus, trd_settlenarrative1, trd_settlenarrative2, trd_settlenarrative3, trd_settlenarrative4, trd_settlenarrative5, trd_settlenarrative6, trd_settlenarrative7, trd_settlenarrative8, trd_dompaliaswil, trd_dompaliasdesc, trd_dompdepottypewil, trd_dompdaccwil, trd_dompservicewil, trd_secpaliaswil, trd_secpservicewil
+FROM trd_settlement
+WHERE trd_recordno = $1
+ORDER BY trd_recordno
+`
+
+func (q *Queries) ListTradeSettlement(ctx context.Context, trdRecordno int32) ([]TrdSettlement, error) {
+	rows, err := q.db.QueryContext(ctx, listTradeSettlement, trdRecordno)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TrdSettlement{}
+	for rows.Next() {
+		var i TrdSettlement
+		if err := rows.Scan(
+			&i.TrdRecordno,
+			&i.TrdDeliverytype,
+			&i.TrdSettleeventinstr,
+			&i.TrdSettleterms,
+			&i.TrdOriginalqty,
+			&i.TrdOpenqty,
+			&i.TrdSettledate,
+			&i.TrdDelrecind,
+			&i.TrdSettlestatus,
+			&i.TrdTradestatus,
+			&i.TrdSettlenarrative1,
+			&i.TrdSettlenarrative2,
+			&i.TrdSettlenarrative3,
+			&i.TrdSettlenarrative4,
+			&i.TrdSettlenarrative5,
+			&i.TrdSettlenarrative6,
+			&i.TrdSettlenarrative7,
+			&i.TrdSettlenarrative8,
+			&i.TrdDompaliaswil,
+			&i.TrdDompaliasdesc,
+			&i.TrdDompdepottypewil,
+			&i.TrdDompdaccwil,
+			&i.TrdDompservicewil,
+			&i.TrdSecpaliaswil,
+			&i.TrdSecpservicewil,
 		); err != nil {
 			return nil, err
 		}
@@ -121,30 +871,30 @@ func (q *Queries) ListAllTrades(ctx context.Context) ([]Trade, error) {
 }
 
 const listTrades = `-- name: ListTrades :many
-SELECT trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_date FROM trade
-WHERE 
-    trd_date = $1 
+SELECT trd_uuid, trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion
+FROM trd_trade
+WHERE trd_versiono = $1
 ORDER BY trd_recordno
-LIMIT $2
-OFFSET $3
+LIMIT $2 OFFSET $3
 `
 
 type ListTradesParams struct {
-	TrdDate time.Time `json:"trd_date"`
-	Limit   int32     `json:"limit"`
-	Offset  int32     `json:"offset"`
+	TrdVersiono int32 `json:"trd_versiono"`
+	Limit       int32 `json:"limit"`
+	Offset      int32 `json:"offset"`
 }
 
-func (q *Queries) ListTrades(ctx context.Context, arg ListTradesParams) ([]Trade, error) {
-	rows, err := q.db.QueryContext(ctx, listTrades, arg.TrdDate, arg.Limit, arg.Offset)
+func (q *Queries) ListTrades(ctx context.Context, arg ListTradesParams) ([]TrdTrade, error) {
+	rows, err := q.db.QueryContext(ctx, listTrades, arg.TrdVersiono, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Trade{}
+	items := []TrdTrade{}
 	for rows.Next() {
-		var i Trade
+		var i TrdTrade
 		if err := rows.Scan(
+			&i.TrdUuid,
 			&i.TrdRecordno,
 			&i.TrdGlosstraderef,
 			&i.TrdVersiono,
@@ -153,7 +903,6 @@ func (q *Queries) ListTrades(ctx context.Context, arg ListTradesParams) ([]Trade
 			&i.TrdSettlementstatus,
 			&i.TrdTradestatus,
 			&i.TrdOriginversion,
-			&i.TrdDate,
 		); err != nil {
 			return nil, err
 		}
