@@ -75,6 +75,20 @@ type Session struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
+type Trade struct {
+	TrdUuid             uuid.UUID `json:"trd_uuid"`
+	TrdRecordno         int32     `json:"trd_recordno"`
+	TrdGlosstraderef    int32     `json:"trd_glosstraderef"`
+	TrdVersiono         int32     `json:"trd_versiono"`
+	TrdOrigin           string    `json:"trd_origin"`
+	TrdTradetype        string    `json:"trd_tradetype"`
+	TrdSettlementstatus string    `json:"trd_settlementstatus"`
+	TrdTradestatus      string    `json:"trd_tradestatus"`
+	TrdOriginversion    int32     `json:"trd_originversion"`
+	TrdAccountsCompany  string    `json:"trd_accounts_company"`
+	TrdJournalNo        string    `json:"trd_journal_no"`
+}
+
 type Transfer struct {
 	ID            int64 `json:"id"`
 	FromAccountID int64 `json:"from_account_id"`

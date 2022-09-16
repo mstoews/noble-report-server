@@ -890,7 +890,7 @@ const listAllTrades = `-- name: ListAllTrades :many
 SELECT trd_uuid, trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion
 FROM trd_trade
 ORDER BY trd_recordno
-LIMIT 20
+LIMIT 1000
 `
 
 func (q *Queries) ListAllTrades(ctx context.Context) ([]TrdTrade, error) {
@@ -1704,6 +1704,45 @@ func (q *Queries) ListTrades(ctx context.Context, arg ListTradesParams) ([]TrdTr
 			&i.TrdSettlementstatus,
 			&i.TrdTradestatus,
 			&i.TrdOriginversion,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const tradesView = `-- name: TradesView :many
+SELECT trd_uuid, trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus, trd_tradestatus, trd_originversion, trd_accounts_company, trd_journal_no FROM trades
+`
+
+func (q *Queries) TradesView(ctx context.Context) ([]Trade, error) {
+	rows, err := q.db.QueryContext(ctx, tradesView)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Trade{}
+	for rows.Next() {
+		var i Trade
+		if err := rows.Scan(
+			&i.TrdUuid,
+			&i.TrdRecordno,
+			&i.TrdGlosstraderef,
+			&i.TrdVersiono,
+			&i.TrdOrigin,
+			&i.TrdTradetype,
+			&i.TrdSettlementstatus,
+			&i.TrdTradestatus,
+			&i.TrdOriginversion,
+			&i.TrdAccountsCompany,
+			&i.TrdJournalNo,
 		); err != nil {
 			return nil, err
 		}

@@ -10,7 +10,7 @@ import (
 )
 
 
-func (server *Server) listParties(ctx *gin.Context) {
+func (server *Server) ListParties(ctx *gin.Context) {
 	parties, err := server.store.ListParties(ctx)
 
 	if err != nil {

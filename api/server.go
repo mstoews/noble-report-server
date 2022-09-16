@@ -58,12 +58,14 @@ func (server *Server) setupRouter() {
 
 	// Trades 
 	authRoutes.GET("/trades", server.listAllTrades)
+	
 
 	// Parties 
-	authRoutes.GET("/parties", server.listParties)
+	authRoutes.GET("/parties", server.ListParties)
 
 	// Instruments 
 	authRoutes.GET("/instruments", server.ListInstruments)
+	authRoutes.GET("/instruments/:id", server.GetInstrumentByRef)
 
 
 	server.router = router

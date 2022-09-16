@@ -317,3 +317,26 @@ create table trd_trade_code
 alter table trd_trade_code
     owner to root;
 
+
+create or replace view trades
+            (trd_uuid, trd_recordno, trd_glosstraderef, trd_versiono, trd_origin, trd_tradetype, trd_settlementstatus,
+             trd_tradestatus, trd_originversion, trd_accounts_company, trd_journal_no)
+as
+SELECT t.trd_uuid,
+       t.trd_recordno,
+       t.trd_glosstraderef,
+       t.trd_versiono,
+       t.trd_origin,
+       t.trd_tradetype,
+       t.trd_settlementstatus,
+       t.trd_tradestatus,
+       t.trd_originversion,
+       j.trd_accounts_company,
+       j.trd_journal_no
+FROM trd_trade t,
+     trd_journal j
+WHERE t.trd_recordno = j.trd_recordno;
+
+alter table trades
+    owner to root;
+

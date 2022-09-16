@@ -22,13 +22,16 @@ LIMIT 1;
 SELECT *
 FROM trd_trade
 ORDER BY trd_recordno
-LIMIT 20;
+LIMIT 1000;
 
 -- name: ListTradeEvent :many
 SELECT *
 FROM trd_event
 WHERE trd_recordno = $1
 ORDER BY trd_recordno;
+
+-- name: TradesView :many
+SELECT * FROM trades;  
 
 -- name: ListTradeEventNarrative :many
 SELECT *

@@ -9,10 +9,44 @@ import (
 	"context"
 )
 
+const getInstrumentsByRef = `-- name: GetInstrumentsByRef :one
+SELECT instr_instref, instr_instgrp, instr_longdesc, instr_denminst, instr_pricedps, instr_divisor, instr_multiplier, instr_pricetype, instr_tick, instr_accrued, instr_minqty, instr_qtydps, instr_shrtdesc, instr_market, instr_settinst, instr_book, instr_maxmovt, instr_minmovt, instr_active, instr_verdat
+FROM instr_instruments WHERE instr_instref = $1
+ORDER BY instr_instref
+`
+
+func (q *Queries) GetInstrumentsByRef(ctx context.Context, instrInstref string) (InstrInstrument, error) {
+	row := q.db.QueryRowContext(ctx, getInstrumentsByRef, instrInstref)
+	var i InstrInstrument
+	err := row.Scan(
+		&i.InstrInstref,
+		&i.InstrInstgrp,
+		&i.InstrLongdesc,
+		&i.InstrDenminst,
+		&i.InstrPricedps,
+		&i.InstrDivisor,
+		&i.InstrMultiplier,
+		&i.InstrPricetype,
+		&i.InstrTick,
+		&i.InstrAccrued,
+		&i.InstrMinqty,
+		&i.InstrQtydps,
+		&i.InstrShrtdesc,
+		&i.InstrMarket,
+		&i.InstrSettinst,
+		&i.InstrBook,
+		&i.InstrMaxmovt,
+		&i.InstrMinmovt,
+		&i.InstrActive,
+		&i.InstrVerdat,
+	)
+	return i, err
+}
+
 const listInstruments = `-- name: ListInstruments :many
 SELECT instr_instref, instr_instgrp, instr_longdesc, instr_denminst, instr_pricedps, instr_divisor, instr_multiplier, instr_pricetype, instr_tick, instr_accrued, instr_minqty, instr_qtydps, instr_shrtdesc, instr_market, instr_settinst, instr_book, instr_maxmovt, instr_minmovt, instr_active, instr_verdat
 FROM instr_instruments
-LIMIT 1000
+LIMIT 10000
 `
 
 func (q *Queries) ListInstruments(ctx context.Context) ([]InstrInstrument, error) {

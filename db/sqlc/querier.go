@@ -41,6 +41,7 @@ type Querier interface {
 	GetAccount(ctx context.Context, id int64) (Account, error)
 	GetAccountForUpdate(ctx context.Context, id int64) (Account, error)
 	GetEntry(ctx context.Context, id int64) (Entry, error)
+	GetInstrumentsByRef(ctx context.Context, instrInstref string) (InstrInstrument, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetTrade(ctx context.Context, trdRecordno int32) (TrdTrade, error)
 	GetTransfer(ctx context.Context, id int64) (Transfer, error)
@@ -72,6 +73,7 @@ type Querier interface {
 	ListTradeSettlement(ctx context.Context, trdRecordno int32) ([]TrdSettlement, error)
 	ListTrades(ctx context.Context, arg ListTradesParams) ([]TrdTrade, error)
 	ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfer, error)
+	TradesView(ctx context.Context) ([]Trade, error)
 	UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error)
 }
 
