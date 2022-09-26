@@ -51,11 +51,7 @@ func (server *Server) setupRouter() {
 	
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))	
 	// Accounts
-	authRoutes.POST("/account", server.createAccount)
-	authRoutes.GET("/accounts/:id", server.getAccount)
-	authRoutes.GET("/accounts", server.listAccounts)
 	
-
 	// Trades 
 	authRoutes.GET("/trades", server.listAllTrades)
 	
