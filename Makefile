@@ -42,6 +42,9 @@ test:
 server:
 	go run main.go
 
+build:
+	go build main.go
+
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/mstoews/prd-backup-server/db/sqlc Store
 

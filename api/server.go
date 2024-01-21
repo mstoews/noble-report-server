@@ -45,42 +45,20 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	// Users
-	router.POST("/users", server.createUser)
+ 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 	router.POST("/tokens/renew_access", server.renewAccessToken)
+	router.GET("/distribution", server.ListDistLedger)
 	
-	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))	
+	// authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))	
 	// Accounts
+	// authRoutes.GET("/trades", server.listAllTrades)
 	
-	// Trades 
-	authRoutes.GET("/trades", server.listAllTrades)
-	
-
-	// Parties 
-	authRoutes.GET("/parties", server.ListParties)
-
-	// Instruments 
-	authRoutes.GET("/instruments", server.ListInstruments)
-	authRoutes.GET("/instruments/:id", server.GetInstrumentByRef)
-
-
 	server.router = router
 }
 
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
-	
-	// server.router.Use(cors.New(cors.Config{
-    //     AllowOrigins:     []string{"*"},
-    //     AllowMethods:     []string{"PUT", "PATCH, POST, GET"},
-    //     AllowHeaders:     []string{"Origin"},
-    //     ExposeHeaders:    []string{"Content-Length"},
-    //     AllowCredentials: true,
-    //     AllowOriginFunc: func(origin string) bool {
-    //         return origin == "http://localhost"
-    //     },
-    //     MaxAge: 12 * time.Hour,
-    // }))
 
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}
