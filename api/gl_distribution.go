@@ -4,6 +4,7 @@ import (
 	//"database/sql"
 	"net/http"
 	"github.com/gin-gonic/gin"
+	"time"
 	// db "github.com/mstoews/prd-backup-server/db/sqlc"
 	// "github.com/mstoews/prd-backup-server/token"
 )
@@ -33,6 +34,19 @@ import (
 
 // 	ctx.JSON(http.StatusOK, trade)
 // }
+
+type DistListResponse struct {
+	Account 		int32       `json:"account"`
+	Child   		int32       `json:"child"`
+	Period  		int32       `json:"period"`
+	Description 	string       `json:"description"`
+	OpeningBalance 	string       `json:"opening_balance"`
+	DebitBalance 	string       `json:"debit_balance"`
+	CreditBalance 	string       `json:"credit_balance"`	
+	UpdateDate 		time.Time    `json:"update_date"`
+	CreateUser  	string       `json:"created_user"`
+}
+
 
 func (server *Server) ListDistLedger(ctx *gin.Context) {
 	gldist, err := server.store.ListDistLedger(ctx)

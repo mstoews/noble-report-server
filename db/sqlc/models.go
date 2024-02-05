@@ -5,10 +5,10 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Account struct {
@@ -30,163 +30,172 @@ type Entry struct {
 type GlAccount struct {
 	Account       int32          `json:"account"`
 	Child         int32          `json:"child"`
-	ParentAccount sql.NullBool   `json:"parent_account"`
-	Type          sql.NullString `json:"type"`
-	SubType       sql.NullString `json:"sub_type"`
-	Description   sql.NullString `json:"description"`
-	Balance       sql.NullString `json:"balance"`
-	Comments      sql.NullString `json:"comments"`
-	CreateDate    sql.NullTime   `json:"create_date"`
-	CreateUser    sql.NullString `json:"create_user"`
-	UpdateDate    sql.NullTime   `json:"update_date"`
-	UpdateUser    sql.NullString `json:"update_user"`
+	ParentAccount pgtype.Bool    `json:"parent_account"`
+	Type          pgtype.Text    `json:"type"`
+	SubType       pgtype.Text    `json:"sub_type"`
+	Description   pgtype.Text    `json:"description"`
+	Balance       pgtype.Numeric `json:"balance"`
+	Comments      pgtype.Text    `json:"comments"`
+	CreateDate    pgtype.Date    `json:"create_date"`
+	CreateUser    pgtype.Text    `json:"create_user"`
+	UpdateDate    pgtype.Date    `json:"update_date"`
+	UpdateUser    pgtype.Text    `json:"update_user"`
 }
 
 type GlAccountType struct {
-	Type        string         `json:"type"`
-	Description sql.NullString `json:"description"`
-	CreateDate  sql.NullTime   `json:"create_date"`
-	CreateUser  sql.NullString `json:"create_user"`
-	UpdateDate  sql.NullTime   `json:"update_date"`
-	UpdateUser  sql.NullString `json:"update_user"`
+	Type        string      `json:"type"`
+	Description pgtype.Text `json:"description"`
+	CreateDate  pgtype.Date `json:"create_date"`
+	CreateUser  pgtype.Text `json:"create_user"`
+	UpdateDate  pgtype.Date `json:"update_date"`
+	UpdateUser  pgtype.Text `json:"update_user"`
 }
 
 type GlDistribution struct {
-	DistParentID int32          `json:"dist_parent_id"`
-	DistChildID  int32          `json:"dist_child_id"`
-	JournalID    sql.NullInt32  `json:"journal_id"`
-	JournalSubid sql.NullInt32  `json:"journal_subid"`
-	CreatedDate  sql.NullTime   `json:"created_date"`
-	UpdateDate   sql.NullTime   `json:"update_date"`
-	CreatedUser  sql.NullString `json:"created_user"`
+	DistParentID int32       `json:"dist_parent_id"`
+	DistChildID  int32       `json:"dist_child_id"`
+	JournalID    pgtype.Int4 `json:"journal_id"`
+	JournalSubid pgtype.Int4 `json:"journal_subid"`
+	CreatedDate  pgtype.Date `json:"created_date"`
+	UpdateDate   pgtype.Date `json:"update_date"`
+	CreatedUser  pgtype.Text `json:"created_user"`
 }
 
 type GlDistributionLedger struct {
 	Account        int32          `json:"account"`
 	Child          int32          `json:"child"`
 	Period         int32          `json:"period"`
-	Description    sql.NullString `json:"description"`
-	OpeningBalance string         `json:"opening_balance"`
-	DebitBalance   string         `json:"debit_balance"`
-	CreditBalance  string         `json:"credit_balance"`
-	ClosingBalance string         `json:"closing_balance"`
-	UpdateDate     sql.NullTime   `json:"update_date"`
-	CreatedUser    sql.NullString `json:"created_user"`
+	PeriodYear     int32          `json:"period_year"`
+	Description    pgtype.Text    `json:"description"`
+	OpeningBalance pgtype.Numeric `json:"opening_balance"`
+	DebitBalance   pgtype.Numeric `json:"debit_balance"`
+	CreditBalance  pgtype.Numeric `json:"credit_balance"`
+	ClosingBalance pgtype.Numeric `json:"closing_balance"`
+	UpdateDate     pgtype.Date    `json:"update_date"`
+	CreatedUser    pgtype.Text    `json:"created_user"`
+}
+
+type GlFund struct {
+	Fund        string      `json:"fund"`
+	Description pgtype.Text `json:"description"`
+	CreateDate  pgtype.Date `json:"create_date"`
+	CreateUser  pgtype.Text `json:"create_user"`
 }
 
 type GlJournalDetail struct {
 	JournalID    int32          `json:"journal_id"`
 	JournalSubid int32          `json:"journal_subid"`
-	Account      sql.NullInt32  `json:"account"`
-	Child        sql.NullInt32  `json:"child"`
-	SubType      sql.NullString `json:"sub_type"`
-	Description  sql.NullString `json:"description"`
-	Debit        sql.NullString `json:"debit"`
-	Credit       sql.NullString `json:"credit"`
-	CreateDate   sql.NullTime   `json:"create_date"`
-	CreateUser   sql.NullString `json:"create_user"`
+	Account      pgtype.Int4    `json:"account"`
+	Child        pgtype.Int4    `json:"child"`
+	SubType      pgtype.Text    `json:"sub_type"`
+	Description  pgtype.Text    `json:"description"`
+	Debit        pgtype.Numeric `json:"debit"`
+	Credit       pgtype.Numeric `json:"credit"`
+	CreateDate   pgtype.Date    `json:"create_date"`
+	CreateUser   pgtype.Text    `json:"create_user"`
 }
 
 type GlJournalHeader struct {
-	JournalID   int32          `json:"journal_id"`
-	Description sql.NullString `json:"description"`
-	Booked      sql.NullBool   `json:"booked"`
-	BookedDate  sql.NullTime   `json:"booked_date"`
-	BookedUser  sql.NullString `json:"booked_user"`
-	CreateDate  sql.NullTime   `json:"create_date"`
-	CreateUser  sql.NullString `json:"create_user"`
-	// Period for the transaction
-	Period sql.NullInt32 `json:"period"`
+	JournalID       int32          `json:"journal_id"`
+	Description     pgtype.Text    `json:"description"`
+	Booked          pgtype.Bool    `json:"booked"`
+	BookedDate      pgtype.Date    `json:"booked_date"`
+	BookedUser      pgtype.Text    `json:"booked_user"`
+	CreateDate      pgtype.Date    `json:"create_date"`
+	CreateUser      pgtype.Text    `json:"create_user"`
+	Period          pgtype.Int4    `json:"period"`
+	TransactionDate pgtype.Date    `json:"transaction_date"`
+	Status          pgtype.Text    `json:"status"`
+	Type            pgtype.Text    `json:"type"`
+	Amount          pgtype.Numeric `json:"amount"`
 }
 
 type GlPeriod struct {
-	PeriodID    int32          `json:"period_id"`
-	StartDate   sql.NullTime   `json:"start_date"`
-	EndDate     sql.NullTime   `json:"end_date"`
-	Description sql.NullString `json:"description"`
-	CreateDate  sql.NullTime   `json:"create_date"`
-	CreateUser  sql.NullString `json:"create_user"`
-	UpdateDate  sql.NullTime   `json:"update_date"`
-	UpdateUser  sql.NullString `json:"update_user"`
+	PeriodID    int32       `json:"period_id"`
+	PeriodYear  int32       `json:"period_year"`
+	StartDate   pgtype.Date `json:"start_date"`
+	EndDate     pgtype.Date `json:"end_date"`
+	Description pgtype.Text `json:"description"`
+	CreateDate  pgtype.Date `json:"create_date"`
+	CreateUser  pgtype.Text `json:"create_user"`
+	UpdateDate  pgtype.Date `json:"update_date"`
+	UpdateUser  pgtype.Text `json:"update_user"`
 }
 
 type GlTrialBalance struct {
 	Account            string         `json:"account"`
 	Child              string         `json:"child"`
-	StartDate          sql.NullTime   `json:"start_date"`
-	EndDate            sql.NullTime   `json:"end_date"`
-	AccountingPeriodID sql.NullInt32  `json:"accounting_period_id"`
-	Description        sql.NullString `json:"description"`
-	Type               sql.NullString `json:"type"`
-	Debit              sql.NullString `json:"debit"`
-	Credit             sql.NullString `json:"credit"`
-	CreateDate         sql.NullTime   `json:"create_date"`
-	CreateUser         sql.NullString `json:"create_user"`
-	UpdateDate         sql.NullTime   `json:"update_date"`
-	UpdateUser         sql.NullString `json:"update_user"`
+	StartDate          pgtype.Date    `json:"start_date"`
+	EndDate            pgtype.Date    `json:"end_date"`
+	AccountingPeriodID pgtype.Int4    `json:"accounting_period_id"`
+	Description        pgtype.Text    `json:"description"`
+	Type               pgtype.Text    `json:"type"`
+	Debit              pgtype.Numeric `json:"debit"`
+	Credit             pgtype.Numeric `json:"credit"`
+	CreateDate         pgtype.Date    `json:"create_date"`
+	CreateUser         pgtype.Text    `json:"create_user"`
+	UpdateDate         pgtype.Date    `json:"update_date"`
+	UpdateUser         pgtype.Text    `json:"update_user"`
 }
 
 type KbPriority struct {
-	Priority    string         `json:"priority"`
-	Description sql.NullString `json:"description"`
-	Updatedte   sql.NullTime   `json:"updatedte"`
-	Updateusr   sql.NullString `json:"updateusr"`
+	Priority    string      `json:"priority"`
+	Description pgtype.Text `json:"description"`
+	Updatedte   pgtype.Date `json:"updatedte"`
+	Updateusr   pgtype.Text `json:"updateusr"`
 }
 
 type KbStatus struct {
-	Status      string         `json:"status"`
-	Description sql.NullString `json:"description"`
-	Updatedte   sql.NullTime   `json:"updatedte"`
-	Updateusr   sql.NullString `json:"updateusr"`
+	Status      string           `json:"status"`
+	Description pgtype.Text      `json:"description"`
+	Updatedte   pgtype.Timestamp `json:"updatedte"`
+	Updateusr   pgtype.Text      `json:"updateusr"`
 }
 
 type KbSubtask struct {
-	TaskID   string         `json:"task_id"`
-	Subid    string         `json:"subid"`
-	Desc     sql.NullString `json:"desc"`
-	Status   sql.NullString `json:"status"`
-	Summary  sql.NullString `json:"summary"`
-	Type     sql.NullString `json:"type"`
-	Estimate sql.NullInt32  `json:"estimate"`
+	TaskID   string      `json:"task_id"`
+	Subid    string      `json:"subid"`
+	Desc     pgtype.Text `json:"desc"`
+	Status   pgtype.Text `json:"status"`
+	Summary  pgtype.Text `json:"summary"`
+	Type     pgtype.Text `json:"type"`
+	Estimate pgtype.Int4 `json:"estimate"`
 }
 
 type KbTask struct {
-	TaskID       string         `json:"task_id"`
-	PartyRef     sql.NullString `json:"party_ref"`
-	Title        sql.NullString `json:"title"`
-	Status       sql.NullString `json:"status"`
-	Summary      sql.NullString `json:"summary"`
-	Type         sql.NullString `json:"type"`
-	Priority     sql.NullString `json:"priority"`
-	Tags         sql.NullString `json:"tags"`
-	Estimate     sql.NullInt32  `json:"estimate"`
-	Assignee     sql.NullString `json:"assignee"`
-	Rankid       sql.NullInt32  `json:"rankid"`
-	Color        sql.NullString `json:"color"`
-	Classname    sql.NullString `json:"classname"`
-	Id           sql.NullInt32  `json:"Id"`
-	Dependencies sql.NullString `json:"dependencies"`
-	Description  sql.NullString `json:"description"`
-	DueDate      sql.NullTime   `json:"due_date"`
-	ParentId     sql.NullInt32  `json:"parentId"`
-	StartDate    sql.NullTime   `json:"start_date"`
+	TaskID       string      `json:"task_id"`
+	Title        pgtype.Text `json:"title"`
+	Status       pgtype.Text `json:"status"`
+	Summary      pgtype.Text `json:"summary"`
+	Type         pgtype.Text `json:"type"`
+	Priority     pgtype.Text `json:"priority"`
+	Tags         pgtype.Text `json:"tags"`
+	Estimate     pgtype.Int4 `json:"estimate"`
+	Assignee     pgtype.Text `json:"assignee"`
+	Rankid       pgtype.Int4 `json:"rankid"`
+	Color        pgtype.Text `json:"color"`
+	Classname    pgtype.Text `json:"classname"`
+	Dependencies pgtype.Text `json:"dependencies"`
+	Description  pgtype.Text `json:"description"`
+	DueDate      pgtype.Date `json:"due_date"`
+	StartDate    pgtype.Date `json:"start_date"`
 }
 
 type KbTeam struct {
-	TeamMember string         `json:"team_member"`
-	FirstName  sql.NullString `json:"first_name"`
-	LastName   sql.NullString `json:"last_name"`
-	Location   sql.NullString `json:"location"`
-	Title      sql.NullString `json:"title"`
-	Updatedte  sql.NullTime   `json:"updatedte"`
-	Updateusr  sql.NullString `json:"updateusr"`
+	TeamMember string           `json:"team_member"`
+	FirstName  pgtype.Text      `json:"first_name"`
+	LastName   pgtype.Text      `json:"last_name"`
+	Location   pgtype.Text      `json:"location"`
+	Title      pgtype.Text      `json:"title"`
+	Updatedte  pgtype.Timestamp `json:"updatedte"`
+	Updateusr  pgtype.Text      `json:"updateusr"`
 }
 
 type KbType struct {
-	Type        string         `json:"type"`
-	Description sql.NullString `json:"description"`
-	Updatedte   sql.NullTime   `json:"updatedte"`
-	Updateusr   sql.NullString `json:"updateusr"`
+	Type        string           `json:"type"`
+	Description pgtype.Text      `json:"description"`
+	Updatedte   pgtype.Timestamp `json:"updatedte"`
+	Updateusr   pgtype.Text      `json:"updateusr"`
 }
 
 type Session struct {
@@ -216,4 +225,16 @@ type User struct {
 	Email             string    `json:"email"`
 	PasswordChangedAt time.Time `json:"password_changed_at"`
 	CreatedAt         time.Time `json:"created_at"`
+	IsEmailVerified   bool      `json:"is_email_verified"`
+	Role              string    `json:"role"`
+}
+
+type VerifyEmail struct {
+	ID         int64     `json:"id"`
+	Username   string    `json:"username"`
+	Email      string    `json:"email"`
+	SecretCode string    `json:"secret_code"`
+	IsUsed     bool      `json:"is_used"`
+	CreatedAt  time.Time `json:"created_at"`
+	ExpiredAt  time.Time `json:"expired_at"`
 }

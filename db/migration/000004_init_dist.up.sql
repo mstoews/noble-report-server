@@ -15,9 +15,8 @@ alter table public.gl_account_type
 
 create table public.gl_period
 (
-    period_id   integer not null
-        constraint gl_period_pk
-            primary key,
+    period_id   integer not null,
+    period_year integer not null,
     start_date  date,
     end_date    date,
     description varchar(40),
@@ -26,6 +25,10 @@ create table public.gl_period
     update_date date,
     update_user varchar(200)
 );
+
+alter table public.gl_period
+    owner to mstoews;
+
 
 alter table public.gl_period
     owner to mstoews;
@@ -69,11 +72,10 @@ create table public.kb_subtask
 alter table public.kb_subtask
     owner to mstoews;
 
+
 create table public.kb_task
 (
-    task_id      text not null
-        primary key,
-    party_ref    text,
+    task_id      text not null primary key,
     title        text,
     status       text,
     summary      text,
@@ -85,13 +87,12 @@ create table public.kb_task
     rankid       integer,
     color        text,
     classname    text,
-    "Id"         integer,
     dependencies text default ''::text,
     description  text,
     due_date     date default CURRENT_TIMESTAMP,
-    "parentId"   integer,
     start_date   date default CURRENT_TIMESTAMP
 );
+
 
 alter table public.kb_task
     owner to mstoews;
@@ -137,6 +138,14 @@ create table public.gl_distribution
         primary key (dist_parent_id, dist_child_id)
 );
 
+create table public.gl_funds (
+    fund varchar PRIMARY KEY,
+    description varchar,
+    create_date date,
+    create_user varchar
+
+);
+
 alter table public.gl_distribution
     owner to mstoews;
 
@@ -168,7 +177,7 @@ create table public.gl_accounts
     child          integer not null,
     parent_account boolean,
     type           varchar(20),
-    sub_type       varchar(10),
+    sub_type       varchar(20),
     description    varchar(40),
     balance        numeric(16, 2),
     comments       varchar(200),
@@ -185,19 +194,21 @@ alter table public.gl_accounts
 
 create table public.gl_journal_header
 (
-    journal_id  integer not null
+    journal_id       integer not null
         constraint gl_journal_header_pk
             primary key,
-    description varchar(100),
-    booked      boolean,
-    booked_date date,
-    booked_user varchar(200),
-    create_date date,
-    create_user varchar(200),
-    period      integer
+    description      varchar(100),
+    booked           boolean,
+    booked_date      date,
+    booked_user      varchar(200),
+    create_date      date,
+    create_user      varchar(200),
+    period           integer,
+    transaction_date date,
+    status           varchar(10),
+    type             varchar(20),
+    amount           numeric(16, 2)
 );
-
-comment on column public.gl_journal_header.period is 'Period for the transaction';
 
 alter table public.gl_journal_header
     owner to mstoews;
@@ -226,6 +237,7 @@ create table public.gl_distribution_ledger
     account         integer        not null,
     child           integer        not null,
     period          integer        not null,
+    period_year     integer        not null,
     description     varchar(100),
     opening_balance numeric(16, 2) not null,
     debit_balance   numeric(16, 2) not null,

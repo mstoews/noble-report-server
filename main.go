@@ -1,17 +1,16 @@
 package main
 
 import (
-	
-	"database/sql"
+	"context"
 	"log"
 	
-	
-
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	
 	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	
 	"github.com/mstoews/prd-backup-server/api"
 	db "github.com/mstoews/prd-backup-server/db/sqlc"
@@ -26,12 +25,9 @@ func main() {
 		log.Fatal("cannot load config:", err)
 	}
 
-	conn, err := sql.Open(config.DBDriver, config.DBSource)
-	if err != nil {
-		log.Fatal("cannot connect to db:", err)
-	}
+	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 
-	store := db.NewStore(conn)
+	store := db.NewStore(connPool)
 	runGinServer(config, store)
 
 }

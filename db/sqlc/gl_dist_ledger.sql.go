@@ -7,17 +7,208 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createJournalDetails = `-- name: CreateJournalDetails :one
+INSERT INTO gl_journal_detail  
+ (
+    journal_id, 
+    journal_subid, 
+    account, 
+    child, 
+    sub_type, 
+    description, 
+    debit, 
+    credit,
+    create_date, 
+    create_user)
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+RETURNING journal_id, journal_subid, account, child, sub_type, description, debit, credit, create_date, create_user
+`
+
+type CreateJournalDetailsParams struct {
+	JournalID    int32          `json:"journal_id"`
+	JournalSubid int32          `json:"journal_subid"`
+	Account      pgtype.Int4    `json:"account"`
+	Child        pgtype.Int4    `json:"child"`
+	SubType      pgtype.Text    `json:"sub_type"`
+	Description  pgtype.Text    `json:"description"`
+	Debit        pgtype.Numeric `json:"debit"`
+	Credit       pgtype.Numeric `json:"credit"`
+	CreateDate   pgtype.Date    `json:"create_date"`
+	CreateUser   pgtype.Text    `json:"create_user"`
+}
+
+func (q *Queries) CreateJournalDetails(ctx context.Context, arg CreateJournalDetailsParams) (GlJournalDetail, error) {
+	row := q.db.QueryRow(ctx, createJournalDetails,
+		arg.JournalID,
+		arg.JournalSubid,
+		arg.Account,
+		arg.Child,
+		arg.SubType,
+		arg.Description,
+		arg.Debit,
+		arg.Credit,
+		arg.CreateDate,
+		arg.CreateUser,
+	)
+	var i GlJournalDetail
+	err := row.Scan(
+		&i.JournalID,
+		&i.JournalSubid,
+		&i.Account,
+		&i.Child,
+		&i.SubType,
+		&i.Description,
+		&i.Debit,
+		&i.Credit,
+		&i.CreateDate,
+		&i.CreateUser,
+	)
+	return i, err
+}
+
+const createJournalHeader = `-- name: CreateJournalHeader :one
+INSERT INTO gl_journal_header 
+(   journal_id, 
+    description, 
+    booked, 
+    booked_date, 
+    booked_user, 
+    create_date, 
+    create_user,
+    period, 
+    transaction_date, 
+    status, 
+    type, 
+    amount)
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+RETURNING journal_id, description, booked, booked_date, booked_user, create_date, create_user, period, transaction_date, status, type, amount
+`
+
+type CreateJournalHeaderParams struct {
+	JournalID       int32          `json:"journal_id"`
+	Description     pgtype.Text    `json:"description"`
+	Booked          pgtype.Bool    `json:"booked"`
+	BookedDate      pgtype.Date    `json:"booked_date"`
+	BookedUser      pgtype.Text    `json:"booked_user"`
+	CreateDate      pgtype.Date    `json:"create_date"`
+	CreateUser      pgtype.Text    `json:"create_user"`
+	Period          pgtype.Int4    `json:"period"`
+	TransactionDate pgtype.Date    `json:"transaction_date"`
+	Status          pgtype.Text    `json:"status"`
+	Type            pgtype.Text    `json:"type"`
+	Amount          pgtype.Numeric `json:"amount"`
+}
+
+func (q *Queries) CreateJournalHeader(ctx context.Context, arg CreateJournalHeaderParams) (GlJournalHeader, error) {
+	row := q.db.QueryRow(ctx, createJournalHeader,
+		arg.JournalID,
+		arg.Description,
+		arg.Booked,
+		arg.BookedDate,
+		arg.BookedUser,
+		arg.CreateDate,
+		arg.CreateUser,
+		arg.Period,
+		arg.TransactionDate,
+		arg.Status,
+		arg.Type,
+		arg.Amount,
+	)
+	var i GlJournalHeader
+	err := row.Scan(
+		&i.JournalID,
+		&i.Description,
+		&i.Booked,
+		&i.BookedDate,
+		&i.BookedUser,
+		&i.CreateDate,
+		&i.CreateUser,
+		&i.Period,
+		&i.TransactionDate,
+		&i.Status,
+		&i.Type,
+		&i.Amount,
+	)
+	return i, err
+}
+
+const getDistLedgerByRef = `-- name: GetDistLedgerByRef :one
+SELECT account, child, period, period_year, description, opening_balance, debit_balance, credit_balance, closing_balance, update_date, created_user
+FROM gl_distribution_ledger WHERE account = $1 and child = $2 and period = $3 
+ORDER BY 3,1,2
+`
+
+type GetDistLedgerByRefParams struct {
+	Account int32 `json:"account"`
+	Child   int32 `json:"child"`
+	Period  int32 `json:"period"`
+}
+
+func (q *Queries) GetDistLedgerByRef(ctx context.Context, arg GetDistLedgerByRefParams) (GlDistributionLedger, error) {
+	row := q.db.QueryRow(ctx, getDistLedgerByRef, arg.Account, arg.Child, arg.Period)
+	var i GlDistributionLedger
+	err := row.Scan(
+		&i.Account,
+		&i.Child,
+		&i.Period,
+		&i.PeriodYear,
+		&i.Description,
+		&i.OpeningBalance,
+		&i.DebitBalance,
+		&i.CreditBalance,
+		&i.ClosingBalance,
+		&i.UpdateDate,
+		&i.CreatedUser,
+	)
+	return i, err
+}
+
+const listAccountTypes = `-- name: ListAccountTypes :many
+SELECT type, description, create_date, create_user, update_date, update_user
+FROM gl_account_type
+ORDER BY 1
+`
+
+func (q *Queries) ListAccountTypes(ctx context.Context) ([]GlAccountType, error) {
+	rows, err := q.db.Query(ctx, listAccountTypes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GlAccountType{}
+	for rows.Next() {
+		var i GlAccountType
+		if err := rows.Scan(
+			&i.Type,
+			&i.Description,
+			&i.CreateDate,
+			&i.CreateUser,
+			&i.UpdateDate,
+			&i.UpdateUser,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDistLedger = `-- name: ListDistLedger :many
-SELECT account, child, period, description, opening_balance, debit_balance, credit_balance, closing_balance, update_date, created_user
+SELECT account, child, period, period_year, description, opening_balance, debit_balance, credit_balance, closing_balance, update_date, created_user
 FROM gl_distribution_ledger
 ORDER BY 3,1,2
 LIMIT 10000
 `
 
 func (q *Queries) ListDistLedger(ctx context.Context) ([]GlDistributionLedger, error) {
-	rows, err := q.db.QueryContext(ctx, listDistLedger)
+	rows, err := q.db.Query(ctx, listDistLedger)
 	if err != nil {
 		return nil, err
 	}
@@ -29,6 +220,7 @@ func (q *Queries) ListDistLedger(ctx context.Context) ([]GlDistributionLedger, e
 			&i.Account,
 			&i.Child,
 			&i.Period,
+			&i.PeriodYear,
 			&i.Description,
 			&i.OpeningBalance,
 			&i.DebitBalance,
@@ -41,8 +233,43 @@ func (q *Queries) ListDistLedger(ctx context.Context) ([]GlDistributionLedger, e
 		}
 		items = append(items, i)
 	}
-	if err := rows.Close(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
+	}
+	return items, nil
+}
+
+const listDistLedgerByPeriod = `-- name: ListDistLedgerByPeriod :many
+SELECT account, child, period, period_year, description, opening_balance, debit_balance, credit_balance, closing_balance, update_date, created_user
+FROM gl_distribution_ledger WHERE period = $1 
+ORDER BY 3,1,2
+`
+
+func (q *Queries) ListDistLedgerByPeriod(ctx context.Context, period int32) ([]GlDistributionLedger, error) {
+	rows, err := q.db.Query(ctx, listDistLedgerByPeriod, period)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GlDistributionLedger{}
+	for rows.Next() {
+		var i GlDistributionLedger
+		if err := rows.Scan(
+			&i.Account,
+			&i.Child,
+			&i.Period,
+			&i.PeriodYear,
+			&i.Description,
+			&i.OpeningBalance,
+			&i.DebitBalance,
+			&i.CreditBalance,
+			&i.ClosingBalance,
+			&i.UpdateDate,
+			&i.CreatedUser,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -50,32 +277,198 @@ func (q *Queries) ListDistLedger(ctx context.Context) ([]GlDistributionLedger, e
 	return items, nil
 }
 
-const getDistLedgerByRef = `-- name: getDistLedgerByRef :one
-SELECT account, child, period, description, opening_balance, debit_balance, credit_balance, closing_balance, update_date, created_user
-FROM gl_distribution_ledger WHERE account = $1 and child = $2 and period = $3 
-ORDER BY 3,1,2
+const listJournalDetails = `-- name: ListJournalDetails :many
+SELECT journal_id, journal_subid, account, child, sub_type, description, debit, credit, create_date, create_user FROM gl_journal_detail order by 1,2
 `
 
-type getDistLedgerByRefParams struct {
-	Account int32 `json:"account"`
-	Child   int32 `json:"child"`
-	Period  int32 `json:"period"`
+func (q *Queries) ListJournalDetails(ctx context.Context) ([]GlJournalDetail, error) {
+	rows, err := q.db.Query(ctx, listJournalDetails)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GlJournalDetail{}
+	for rows.Next() {
+		var i GlJournalDetail
+		if err := rows.Scan(
+			&i.JournalID,
+			&i.JournalSubid,
+			&i.Account,
+			&i.Child,
+			&i.SubType,
+			&i.Description,
+			&i.Debit,
+			&i.Credit,
+			&i.CreateDate,
+			&i.CreateUser,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
-func (q *Queries) getDistLedgerByRef(ctx context.Context, arg getDistLedgerByRefParams) (GlDistributionLedger, error) {
-	row := q.db.QueryRowContext(ctx, getDistLedgerByRef, arg.Account, arg.Child, arg.Period)
-	var i GlDistributionLedger
+const listJournalHeader = `-- name: ListJournalHeader :many
+SELECT journal_id, description, booked, booked_date, booked_user, create_date, create_user, period, transaction_date, status, type, amount FROM gl_journal_header ORDER BY 1
+`
+
+func (q *Queries) ListJournalHeader(ctx context.Context) ([]GlJournalHeader, error) {
+	rows, err := q.db.Query(ctx, listJournalHeader)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GlJournalHeader{}
+	for rows.Next() {
+		var i GlJournalHeader
+		if err := rows.Scan(
+			&i.JournalID,
+			&i.Description,
+			&i.Booked,
+			&i.BookedDate,
+			&i.BookedUser,
+			&i.CreateDate,
+			&i.CreateUser,
+			&i.Period,
+			&i.TransactionDate,
+			&i.Status,
+			&i.Type,
+			&i.Amount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateJournalDetails = `-- name: UpdateJournalDetails :one
+UPDATE gl_journal_detail 
+SET 
+    account = $3, 
+    child = $4, 
+    sub_type = $5, 
+    description = $6, 
+    debit = $7, 
+    credit = $8,
+    create_date = $9, 
+    create_user = $10
+WHERE journal_id = $1 and journal_subid = $2
+RETURNING journal_id, journal_subid, account, child, sub_type, description, debit, credit, create_date, create_user
+`
+
+type UpdateJournalDetailsParams struct {
+	JournalID    int32          `json:"journal_id"`
+	JournalSubid int32          `json:"journal_subid"`
+	Account      pgtype.Int4    `json:"account"`
+	Child        pgtype.Int4    `json:"child"`
+	SubType      pgtype.Text    `json:"sub_type"`
+	Description  pgtype.Text    `json:"description"`
+	Debit        pgtype.Numeric `json:"debit"`
+	Credit       pgtype.Numeric `json:"credit"`
+	CreateDate   pgtype.Date    `json:"create_date"`
+	CreateUser   pgtype.Text    `json:"create_user"`
+}
+
+func (q *Queries) UpdateJournalDetails(ctx context.Context, arg UpdateJournalDetailsParams) (GlJournalDetail, error) {
+	row := q.db.QueryRow(ctx, updateJournalDetails,
+		arg.JournalID,
+		arg.JournalSubid,
+		arg.Account,
+		arg.Child,
+		arg.SubType,
+		arg.Description,
+		arg.Debit,
+		arg.Credit,
+		arg.CreateDate,
+		arg.CreateUser,
+	)
+	var i GlJournalDetail
 	err := row.Scan(
+		&i.JournalID,
+		&i.JournalSubid,
 		&i.Account,
 		&i.Child,
-		&i.Period,
+		&i.SubType,
 		&i.Description,
-		&i.OpeningBalance,
-		&i.DebitBalance,
-		&i.CreditBalance,
-		&i.ClosingBalance,
-		&i.UpdateDate,
-		&i.CreatedUser,
+		&i.Debit,
+		&i.Credit,
+		&i.CreateDate,
+		&i.CreateUser,
+	)
+	return i, err
+}
+
+const updateJournalHeader = `-- name: UpdateJournalHeader :one
+UPDATE gl_journal_header 
+SET 
+    journal_id = $1, 
+    description = $2, 
+    booked = $3, 
+    booked_date = $4, 
+    booked_user = $5, 
+    create_date = $6, 
+    create_user = $7,
+    period = $8, 
+    transaction_date = $9, 
+    status = $10, 
+    type = $11, 
+    amount = $12
+WHERE journal_id = $1
+RETURNING journal_id, description, booked, booked_date, booked_user, create_date, create_user, period, transaction_date, status, type, amount
+`
+
+type UpdateJournalHeaderParams struct {
+	JournalID       int32          `json:"journal_id"`
+	Description     pgtype.Text    `json:"description"`
+	Booked          pgtype.Bool    `json:"booked"`
+	BookedDate      pgtype.Date    `json:"booked_date"`
+	BookedUser      pgtype.Text    `json:"booked_user"`
+	CreateDate      pgtype.Date    `json:"create_date"`
+	CreateUser      pgtype.Text    `json:"create_user"`
+	Period          pgtype.Int4    `json:"period"`
+	TransactionDate pgtype.Date    `json:"transaction_date"`
+	Status          pgtype.Text    `json:"status"`
+	Type            pgtype.Text    `json:"type"`
+	Amount          pgtype.Numeric `json:"amount"`
+}
+
+func (q *Queries) UpdateJournalHeader(ctx context.Context, arg UpdateJournalHeaderParams) (GlJournalHeader, error) {
+	row := q.db.QueryRow(ctx, updateJournalHeader,
+		arg.JournalID,
+		arg.Description,
+		arg.Booked,
+		arg.BookedDate,
+		arg.BookedUser,
+		arg.CreateDate,
+		arg.CreateUser,
+		arg.Period,
+		arg.TransactionDate,
+		arg.Status,
+		arg.Type,
+		arg.Amount,
+	)
+	var i GlJournalHeader
+	err := row.Scan(
+		&i.JournalID,
+		&i.Description,
+		&i.Booked,
+		&i.BookedDate,
+		&i.BookedUser,
+		&i.CreateDate,
+		&i.CreateUser,
+		&i.Period,
+		&i.TransactionDate,
+		&i.Status,
+		&i.Type,
+		&i.Amount,
 	)
 	return i, err
 }
