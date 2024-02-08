@@ -17,3 +17,14 @@ func (server *Server) KBTasks(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, kbtask)
 }
+
+func (server *Server) GetTasks(ctx *gin.Context) {
+	kbtasklist , err := server.store.GetTaskList(ctx)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, kbtasklist)
+}
+

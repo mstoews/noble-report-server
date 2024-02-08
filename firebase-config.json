@@ -1,0 +1,14 @@
+{
+    "type": "service_account",
+    "project_id": "condo-mgmt",
+    "private_key_id": "d8b017cf183383830d22f0f3a8102a997c561e0d",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC8JkPB4ehFrF11\nraiGQGsqNmaKrI+ceU+OfWIVeaRHtiLJSAm6Yxg6Hsju2zIDgeBuWj0t5eMcdJ4R\niJkJZcq8c0Y29D1KEGBxIP76jWGMrIPt5LXcNgYDepZt2BoheqgLKnTyi1lz59xv\nSjVkW6jzulfQQdldukxFk1TwPyIkKik6WOUP7BzEy7m9GxcNbWQh8IkDYWmxRCuZ\nMX9xX5MeAzAHJhSd41i2qHm0EqmQ79KCSVLw+vpRdhqBKlcpTWmYRZT5GtlJfsAt\nDVwcEAvj6fphiPhZvh6NTv/GL1nJxf+bsxjY0OdGeKrNCq4LtOyzUrXAnZjG71Qx\nVP03yxRBAgMBAAECggEAKWNfd1hrAFycyIS1dCbajBQgdXPlOX4EDqutNl0mUrIR\nr+ZdYXdn/m0ENWrZcyUQSiYmnCCcV4edt+ytAYC3WsIe2Xrbup2koW4pONN9+HSA\npwWvLaxioURHsA0gHmo9agtiY3Jc8J66Am84FIYHQeolZAYAO1p+abWxsxGoQHz2\nPbTyvghT4K/t6QI2rDG3GNMeRpbDJ2jDkzjRp1azGhBLjxWn1meHso6xvkmwb/9G\n7rk5u5F96WMkFGjpMFTrhM8Yr3jSBM2XmkjsfDWhpVYy7SkOgQunWTsGmK0KkOQd\nUMG7/cRCpZ8kqk8j4mUNmybqj4QltCHhGxZAD2nTawKBgQD9PPgDCjC2oPKmeyi3\n5Do4KYHKPlgFQAdfXFpbdls9yvJ2Q1BVCLy9tuQTZPpmbuklDeMDGYlQCDHpI6sO\nw84GomeCc3aUi5Nqg/R1JFp0Ds102PXgxppEDfXN3GnjC+N+muP8lt/4gRaM7Xvk\nG19mcJ4NqxPbSmHmVCTPgWnbswKBgQC+M5IdxIH7X4sAwWYFzF20Ww21OvICqHJh\nkatltzsEs3jlvk7/W3xjyijQBO6bsd3Ij7d20F0aOOktfkKD3uTz7ZKcvFxwnAJu\nCOgyml/M9piGpVVB/tYIj/HpdZK5/8wSlvlOd3mvKDmQAEnFaPhlRcJzSJrPX0ch\n08nHGSPGOwKBgQCD4UZ/vsTTt0nm7WitK8wuB1+yRXltcoTkYqIj06V8rr5KXI/v\nWNeCLUbl2saUpdoBFBRPPvNFnJ7xfUPOMqaOyfEB/MOaZH3nEMU0ZDQ/EJ5q5bpW\nztbz7hk+ljUGquBUxLFKkAAf2Io35k2I48BxBuEo2RlEMJ5/Zv6smgbZBQKBgQCK\nV5BLvoacg93i6sh+Jytw51mNHBazADpR5VY5YZC31qJ02Hs1GSHco0oUI8I51KFw\nI7hZ3ywYypQv1soiiJkXIxGklwzVi2PpDOl3BPnxZtuB8/eTTPv4tlpKaI4UY43X\nZ6BmBlinoiZcKxl9UOB7KMZKe+C+PJrMa/MzsYFnyQKBgQDlRzVOvLBczUMQfQrb\ngqcvfMhOlXV4v+bgAhE/j8uh0Mv30oZdJn2Mak3uREN/IPfKZNEw84k85RUQsj7i\nXkl9gOfPmBy9a/KcXHil/TiHj8JS7Jd6HitGBrK6ukRg6sI7Z8jImA7x51NmOAag\nxJ/LSpJUOdem0Twps4EZtK8W7Q==\n-----END PRIVATE KEY-----\n",
+    "client_email": "firebase-adminsdk-tkl7q@condo-mgmt.iam.gserviceaccount.com",
+    "client_id": "106788123379073505103",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-tkl7q%40condo-mgmt.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+  }
+  

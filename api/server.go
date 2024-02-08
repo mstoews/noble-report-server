@@ -2,12 +2,14 @@ package api
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	db "github.com/mstoews/prd-backup-server/db/sqlc"
+	pbauth "github.com/mstoews/prd-backup-server/fbauth"
 	"github.com/mstoews/prd-backup-server/token"
 	"github.com/mstoews/prd-backup-server/util"
 )
@@ -42,7 +44,14 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 }
 
 func (server *Server) setupRouter() {
+	client, err := pbauth.InitAuth()
+	if err != nil {
+		log.Fatalln("failed to init firebase auth", err)
+	}
+
 	router := gin.Default()
+	
+	
 	router.ForwardedByClientIP = true
 	router.SetTrustedProxies([]string{"127.0.0.1"})
 
@@ -50,20 +59,22 @@ func (server *Server) setupRouter() {
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 	router.POST("/tokens/renew_access", server.renewAccessToken)
-
-	// Accounting
-	router.GET("/dist", server.ListDistLedger)
-	router.GET("/accounts", server.GLAccounts)
-	router.GET("/types", server.GLAccountTypes)
-	router.GET("/journals", server.GlJournalDetail)
-	router.GET("/period", server.GlPeriod)
-	router.GET("/dist_by_prd/:id", server.ListDistributionLedgerByPeriod)
-	router.GET("/funds", server.ListFunds)
-	router.GET("/tasks", server.KBTasks)
+	router.GET("/accts", server.GLAccounts)
 
 	// Middleware
-	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRoutes := router.Group("/").Use(pbauth.AuthJWT(client))
+
 	authRoutes.GET("/journal", server.KBTasks)
+	authRoutes.GET("/dist", server.ListDistLedger)
+	authRoutes.GET("/accounts", server.GLAccounts)
+	authRoutes.GET("/types", server.GLAccountTypes)
+	authRoutes.GET("/journals", server.GlJournalDetail)
+	authRoutes.GET("/period", server.GlPeriod)
+	authRoutes.GET("/dist_by_prd/:id", server.ListDistributionLedgerByPeriod)
+	authRoutes.GET("/funds", server.ListFunds)
+	authRoutes.GET("/tasks", server.KBTasks)
+	authRoutes.GET("/tasklist", server.GetTasks)
+
 
 	server.router = router
 }

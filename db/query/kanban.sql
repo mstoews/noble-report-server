@@ -1,3 +1,6 @@
+-- name: GetTaskList :many
+select task_id as Id, title, status, summary, priority, tags, rankid, assignee from public.kb_task;
+
 -- name: ListTasks :many
 SELECT * FROM kb_task ORDER BY 1;
 

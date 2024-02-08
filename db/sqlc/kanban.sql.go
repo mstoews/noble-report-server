@@ -78,6 +78,50 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (KbTask,
 	return i, err
 }
 
+const getTaskList = `-- name: GetTaskList :many
+select task_id as Id, title, status, summary, priority, tags, rankid, assignee from public.kb_task
+`
+
+type GetTaskListRow struct {
+	ID       string      `json:"id"`
+	Title    pgtype.Text `json:"title"`
+	Status   pgtype.Text `json:"status"`
+	Summary  pgtype.Text `json:"summary"`
+	Priority pgtype.Text `json:"priority"`
+	Tags     pgtype.Text `json:"tags"`
+	Rankid   pgtype.Int4 `json:"rankid"`
+	Assignee pgtype.Text `json:"assignee"`
+}
+
+func (q *Queries) GetTaskList(ctx context.Context) ([]GetTaskListRow, error) {
+	rows, err := q.db.Query(ctx, getTaskList)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetTaskListRow{}
+	for rows.Next() {
+		var i GetTaskListRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Status,
+			&i.Summary,
+			&i.Priority,
+			&i.Tags,
+			&i.Rankid,
+			&i.Assignee,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTasks = `-- name: GetTasks :many
 SELECT task_id, title, status, summary, type, priority, tags, estimate, assignee, rankid, color, classname, dependencies, description, due_date, start_date FROM kb_task WHERE task_id = $1 ORDER BY 1
 `

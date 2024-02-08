@@ -6,6 +6,7 @@ package db
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 )
 
@@ -25,6 +26,7 @@ type Querier interface {
 	GetFund(ctx context.Context, fund string) (GlFund, error)
 	GetGLAccount(ctx context.Context, arg GetGLAccountParams) (GlAccount, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
+	GetTaskList(ctx context.Context) ([]GetTaskListRow, error)
 	GetTasks(ctx context.Context, taskID string) ([]KbTask, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	ListAccountTypes(ctx context.Context) ([]GlAccountType, error)
