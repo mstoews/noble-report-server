@@ -1,45 +1,55 @@
 package fbauth
 
 import (
+	"errors"
+	"firebase.google.com/go/auth"
+	"github.com/gin-gonic/gin"
+	"github.com/mstoews/prd-backup-server/secrets"
 	"log"
 	"net/http"
 	"strings"
 	"time"
-	"github.com/mstoews/prd-backup-server/secrets"
-	"firebase.google.com/go/auth"
-	"github.com/gin-gonic/gin"
 )
 
 //
 
 const (
-	authorizationHeader = "Authorization"
-	apiKeyHeader 		= "X-API-Key"
-	cronExecutedHeader	= "X-Appengine-Cron"
-	valName = "FIREBASE_ID_TOKEN"
+	authorizationHeader    = "Authorization"
+	apiKeyHeader           = "X-API-Key"
+	cronExecutedHeader     = "X-Appengine-Cron"
+	valName                = "FIREBASE_ID_TOKEN"
+	authorizationHeaderKey = "authorization"
 )
 
 func AuthJWT(client *auth.Client) gin.HandlerFunc {
-	return func (c *gin.Context){
+	return func(ctx *gin.Context) {
 		startTime := time.Now()
+		authHeader := ctx.Request.Header.Get(authorizationHeader)
+		if len(authHeader) == 0 {
+			err := errors.New("Authorization header is not provided")
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+			return
+		}
 
-		authHeader := c.Request.Header.Get(authorizationHeader)
-		log.Println ("authHeader ", authHeader)
+		log.Println("authHeader ", authHeader)
 		token := strings.Replace(authHeader, "Bearer", "", 1)
 
-		idToken, err := client.VerifyIDToken(c, token) // usually gets it from the cache
-
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H {
-				"code": http.StatusUnauthorized,
-				"message": http.StatusText(http.StatusUnauthorized),
-			})
-		}
+		//idToken, err := client.VerifyIDToken(ctx, token) // usually gets it from the cache
+		//
+		//if err != nil {
+		//	ctx.JSON(http.StatusUnauthorized, gin.H{
+		//		"code":    http.StatusUnauthorized,
+		//		"message": http.StatusText(http.StatusUnauthorized),
+		//	})
+		//	err := errors.New("Authorization header is not provided")
+		//	ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+		//	return
+		//}
 
 		log.Println("Auth Time", time.Since(startTime))
 
-		c.Set(valName, idToken)
-		c.Next()
+		ctx.Set(valName, token)
+		ctx.Next()
 
 		// Authorization Bearer ID_TOKEN
 	}
@@ -92,4 +102,8 @@ func AuthAppEngineCron() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
 }

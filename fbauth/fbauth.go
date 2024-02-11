@@ -17,12 +17,12 @@ func InitAuth() (*auth.Client, error) {
 	opt := option.WithCredentialsFile("../firebase-config.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		return nil, errors.Wrap(err, "error initializating firebase auth (creating client app)")
+		return nil, errors.Wrap(err, "error initialize firebase auth (creating client app)")
 	}
 
 	client, errAuth := app.Auth(context.Background())
 	if errAuth != nil {
-		return nil, errors.Wrap(err, "error initializing firebase auth (creating client app)")
+		return nil, errors.Wrap(err, "error initialize firebase auth (creating client app)")
 	}
 
 	return client, nil

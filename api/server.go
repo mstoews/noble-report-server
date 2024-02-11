@@ -2,12 +2,10 @@ package api
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
+	"log"
+	// "github.com/gin-gonic/gin/binding"
 	db "github.com/mstoews/prd-backup-server/db/sqlc"
 	pbauth "github.com/mstoews/prd-backup-server/fbauth"
 	"github.com/mstoews/prd-backup-server/token"
@@ -35,9 +33,9 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 		tokenMaker: tokenMaker,
 	}
 
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("currency", validCurrency)
-	}
+	// if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+	// 	v.RegisterValidation("currency", validCurrency)
+	// }
 
 	server.setupRouter()
 	return server, nil
@@ -45,13 +43,13 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 
 func (server *Server) setupRouter() {
 	client, err := pbauth.InitAuth()
+
 	if err != nil {
 		log.Fatalln("failed to init firebase auth", err)
 	}
 
 	router := gin.Default()
-	
-	
+
 	router.ForwardedByClientIP = true
 	router.SetTrustedProxies([]string{"127.0.0.1"})
 
@@ -74,7 +72,6 @@ func (server *Server) setupRouter() {
 	authRoutes.GET("/funds", server.ListFunds)
 	authRoutes.GET("/tasks", server.KBTasks)
 	authRoutes.GET("/tasklist", server.GetTasks)
-
 
 	server.router = router
 }
